@@ -1,0 +1,42 @@
+# Read the data from "Coronarios.txt" into the 'Coronarios' DataFrame
+Coronarios <- read.table("Coronarios.txt", header = T, sep = "")
+
+# Fit a logistic regression model with only an intercept to the 'Coronarios' data
+Ajuste.Coronarios0 <- glm(cbind(EC1, EC0) ~ 1, family = binomial, data = Coronarios)
+
+# Fit a logistic regression model with 'Ciga', 'Compor', and 'Psang' as predictors
+Ajuste.Coronarios.All <- glm(cbind(EC1, EC0) ~ Ciga + Compor + Psang, family = binomial, data = Coronarios)
+
+# Perform stepwise model selection from the null model, considering the addition or removal of predictors
+Ajuste.Coronarios.Step <- step(Ajuste.Coronarios0, scope = list(lower = cbind(EC1, EC0) ~ 1, upper = cbind(EC1, EC0) ~ Ciga + Compor + Psang), direction = "both")
+
+# Create vectors for 'Ec', 'Ciga', 'Tipo', 'Presion', and 'Freq'
+Ec <- c("Si", "No", "Si", "No", "Si", "No", "Si", "No", "Si", "No", "Si", "No", "Si", "No", "Si", "No",
+        "Si", "No", "Si", "No", "Si", "No", "Si", "No", "Si", "No", "Si", "No", "Si", "No", "Si", "No")
+Ciga <- c("C1", "C1", "C2", "C2", "C3", "C3", "C4", "C4", "C1", "C1", "C2", "C2", "C3", "C3", "C4", "C4",
+          "C1", "C1", "C2", "C2", "C3", "C3", "C4", "C4", "C1", "C1", "C2", "C2", "C3", "C3", "C4", "C4")
+Tipo <- rep(c("A", "B"), each = 16)
+Presion <- rep(c("Alta", "Baja"), each = 8, times = 2)
+Freq <- c(29, 155, 21, 76, 7, 45, 12, 43, 8, 171, 9, 62, 3, 31, 7, 14,
+          41, 599, 24, 277, 27, 140, 17, 116, 20, 669, 16, 320, 13, 139, 3, 80)
+
+# Create a DataFrame from the vectors
+Coronarios.Tabla <- data.frame(Ec, Ciga, Tipo, Presion, Freq)
+
+# Convert 'Ciga', 'Tipo', 'Presion', and 'Ec' into factor variables
+Coronarios.Tabla$Ciga <- as.factor(Coronarios.Tabla$Ciga)
+Coronarios.Tabla$Tipo <- as.factor(Coronarios.Tabla$Tipo)
+Coronarios.Tabla$Presion <- as.factor(Coronarios.Tabla$Presion)
+Coronarios.Tabla$Ec <- as.factor(Coronarios.Tabla$Ec)
+
+# Check the levels of the factor variables
+levels(Coronarios.Tabla$Ciga)
+levels(Coronarios.Tabla$Tipo)
+levels(Coronarios.Tabla$Presion)
+levels(Coronarios.Tabla$Ec)
+
+# Fit a logistic regression model with 'Ec' as the response and 'Ciga', 'Tipo', and 'Presion' as predictors, using 'Freq' as weights
+Ajuste.Coronarios.Tabla <- glm(Ec ~ Ciga + Tipo + Presion, weights = Freq, data = Coronarios.Tabla, family = binomial)
+
+# Display the fitted logistic regression model
+Ajuste.Coronarios.Tabla
